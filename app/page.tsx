@@ -49,22 +49,21 @@ export default async function Home() {
     currenciesResult.status === "fulfilled" ? currenciesResult.value : {};
 
   return (
-    <div className="flex-1 bg-zinc-50 text-zinc-950">
-      <main className="max-w-5xl mx-auto px-6 py-12">
-        <header className="mb-8 flex items-center gap-2">
+    <div className="flex-1 bg-zinc-50">
+      <main className="max-w-5xl mx-auto px-6 py-12 bg-zinc-50 min-h-screen">
+        <header className="flex items-center gap-2">
           <LineChart className="size-6 text-indigo-600" aria-hidden="true" />
-          <h1 className="text-2xl font-semibold tracking-tight">
+          <h1 className="text-2xl font-semibold text-zinc-900">
             Currency Dashboard
           </h1>
         </header>
+        <p className="text-sm text-zinc-500 mt-1">
+          Exchange rates for 1 {BASE_CURRENCY}
+        </p>
 
         {latest ? (
           <>
-            <p className="mb-6 text-sm text-zinc-500">
-              Exchange rates for 1 {latest.base}
-            </p>
-
-            <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8">
               {FEATURED_CURRENCIES.map((code) => {
                 const rate = latest.rates[code];
                 const name = currencies[code] ?? FALLBACK_NAMES[code] ?? code;
@@ -72,20 +71,18 @@ export default async function Home() {
                 return (
                   <li
                     key={code}
-                    className="rounded-xl border border-zinc-200 bg-white p-5 transition-shadow hover:shadow-sm"
+                    className="rounded-xl border border-zinc-200 bg-white p-6 hover:shadow-sm transition-shadow"
                   >
-                    <p className="text-sm font-semibold tracking-wide">
-                      {code}
-                    </p>
-                    <p className="mt-0.5 truncate text-sm text-zinc-500">
+                    <p className="text-sm font-medium text-zinc-500">{code}</p>
+                    <p className="text-xs text-zinc-400 mt-1 truncate">
                       {name}
                     </p>
                     {rate !== undefined ? (
-                      <p className="mt-4 text-2xl font-semibold tabular-nums text-indigo-600">
+                      <p className="text-2xl font-semibold text-indigo-600 mt-3 tabular-nums">
                         {formatRate(rate)}
                       </p>
                     ) : (
-                      <p className="mt-4 text-sm text-zinc-400">
+                      <p className="text-sm text-zinc-400 mt-3">
                         Rate not available
                       </p>
                     )}
@@ -94,11 +91,11 @@ export default async function Home() {
               })}
             </ul>
 
-            <footer className="mt-10 text-xs text-zinc-500">
+            <footer className="text-xs text-zinc-500 mt-8 text-center">
               Last updated {formatDate(latest.date)} · Data from{" "}
               <a
                 href="https://www.frankfurter.app/"
-                className="underline underline-offset-2 hover:text-zinc-950"
+                className="underline underline-offset-2 hover:text-zinc-900"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -109,9 +106,11 @@ export default async function Home() {
         ) : (
           <div
             role="alert"
-            className="rounded-xl border border-zinc-200 bg-white p-6"
+            className="rounded-xl border border-zinc-200 bg-white p-6 mt-8"
           >
-            <p className="font-medium">Couldn&apos;t load exchange rates.</p>
+            <p className="font-medium text-zinc-900">
+              Couldn&apos;t load exchange rates.
+            </p>
             <p className="mt-1 text-sm text-zinc-500">
               The Frankfurter API may be temporarily unavailable. Please try
               again in a few minutes.
