@@ -1,35 +1,8 @@
 import { LineChart } from "lucide-react";
 import { getCurrencies, getLatestRates } from "@/lib/frankfurter";
+import LiveRates from "./LiveRates";
 
 const BASE_CURRENCY = "USD";
-
-const FEATURED_CURRENCIES = [
-  "ZAR",
-  "EUR",
-  "GBP",
-  "JPY",
-  "AUD",
-  "CAD",
-  "CHF",
-  "CNY",
-  "INR",
-  "BRL",
-  "NGN",
-  "KES",
-] as const;
-
-// Frankfurter only covers ECB reference currencies, so some codes have no name entry.
-const FALLBACK_NAMES: Record<string, string> = {
-  NGN: "Nigerian Naira",
-  KES: "Kenyan Shilling",
-};
-
-function formatRate(rate: number): string {
-  return new Intl.NumberFormat("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: rate < 10 ? 4 : 2,
-  }).format(rate);
-}
 
 function formatDate(isoDate: string): string {
   return new Intl.DateTimeFormat("en-US", {
@@ -61,62 +34,24 @@ export default async function Home() {
           Exchange rates for 1 {BASE_CURRENCY}
         </p>
 
-        {latest ? (
-          <>
-            <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8">
-              {FEATURED_CURRENCIES.map((code) => {
-                const rate = latest.rates[code];
-                const name = currencies[code] ?? FALLBACK_NAMES[code] ?? code;
+        <LiveRates
+          initialRates={latest?.rates ?? {}}
+          initialDate={latest?.date ?? ""}
+          currencies={currencies}
+        />
 
-                return (
-                  <li
-                    key={code}
-                    className="rounded-xl border border-zinc-200 bg-white p-6 hover:shadow-sm transition-shadow"
-                  >
-                    <p className="text-sm font-medium text-zinc-500">{code}</p>
-                    <p className="text-xs text-zinc-400 mt-1 truncate">
-                      {name}
-                    </p>
-                    {rate !== undefined ? (
-                      <p className="text-2xl font-semibold text-indigo-600 mt-3 tabular-nums">
-                        {formatRate(rate)}
-                      </p>
-                    ) : (
-                      <p className="text-sm text-zinc-400 mt-3">
-                        Rate not available
-                      </p>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-
-            <footer className="text-xs text-zinc-500 mt-8 text-center">
-              Last updated {formatDate(latest.date)} · Data from{" "}
-              <a
-                href="https://www.frankfurter.app/"
-                className="underline underline-offset-2 hover:text-zinc-900"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Frankfurter
-              </a>
-            </footer>
-          </>
-        ) : (
-          <div
-            role="alert"
-            className="rounded-xl border border-zinc-200 bg-white p-6 mt-8"
+        <footer className="text-xs text-zinc-500 mt-8 text-center">
+          {latest && <>Last updated {formatDate(latest.date)} · </>}
+          Data from{" "}
+          <a
+            href="https://www.frankfurter.app/"
+            className="underline underline-offset-2 hover:text-zinc-900"
+            target="_blank"
+            rel="noopener noreferrer"
           >
-            <p className="font-medium text-zinc-900">
-              Couldn&apos;t load exchange rates.
-            </p>
-            <p className="mt-1 text-sm text-zinc-500">
-              The Frankfurter API may be temporarily unavailable. Please try
-              again in a few minutes.
-            </p>
-          </div>
-        )}
+            Frankfurter
+          </a>
+        </footer>
       </main>
     </div>
   );
