@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import type { BaseCurrency, RatesResponse } from "./api/rates/route";
 import Converter from "./Converter";
+import RateChart from "./RateChart";
 
 const POLL_INTERVAL_MS = 30_000;
 const TICK_INTERVAL_MS = 1_000;
@@ -108,6 +109,7 @@ export default function LiveRates({
   );
   const [now, setNow] = useState<number>(() => Date.now());
   const [refreshFailed, setRefreshFailed] = useState<boolean>(!initialDate);
+  const [selectedSymbol, setSelectedSymbol] = useState<string | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -237,32 +239,45 @@ export default function LiveRates({
           {FEATURED_CURRENCIES.map((code) => {
             const rate =
               code === snapshot.base ? 1 : snapshot.rates[code];
+            const isSelected = code === selectedSymbol;
 
             return (
-              <li
-                key={code}
-                className="rounded-xl border border-zinc-200 bg-white p-6 hover:shadow-sm transition-shadow"
-              >
-                <p className="text-sm font-medium text-zinc-500">{code}</p>
-                <p className="text-xs text-zinc-400 mt-1 truncate">
-                  {currencies[code] ?? code}
-                </p>
-                {rate !== undefined ? (
-                  <p className="text-2xl font-semibold text-indigo-600 mt-3 tabular-nums">
-                    {formatRate(rate)}
-                  </p>
-                ) : (
-                  <p
-                    className="text-2xl font-semibold text-zinc-300 mt-3"
-                    title="Rate not available"
-                  >
-                    —
-                  </p>
-                )}
+              <li key={code}>
+                <button
+                  type="button"
+                  onClick={() => setSelectedSymbol(code)}
+                  aria-pressed={isSelected}
+                  className={`block h-full w-full cursor-pointer rounded-xl bg-white text-left transition-shadow hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600/30 ${
+                    isSelected
+                      ? "border-2 border-indigo-500 p-[23px] shadow-sm"
+                      : "border border-zinc-200 p-6"
+                  }`}
+                >
+                  <span className="block text-sm font-medium text-zinc-500">
+                    {code}
+                  </span>
+                  <span className="block text-xs text-zinc-400 mt-1 truncate">
+                    {currencies[code] ?? code}
+                  </span>
+                  {rate !== undefined ? (
+                    <span className="block text-2xl font-semibold text-indigo-600 mt-3 tabular-nums">
+                      {formatRate(rate)}
+                    </span>
+                  ) : (
+                    <span
+                      className="block text-2xl font-semibold text-zinc-300 mt-3"
+                      title="Rate not available"
+                    >
+                      —
+                    </span>
+                  )}
+                </button>
               </li>
             );
           })}
         </ul>
+
+        <RateChart baseCurrency={snapshot.base} symbol={selectedSymbol} />
       </section>
     </>
   );
