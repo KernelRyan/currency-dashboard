@@ -3,9 +3,11 @@
 import { useId, useMemo, useState } from "react";
 import { ArrowLeftRight, ArrowRightLeft } from "lucide-react";
 
-const BASE_CURRENCY = "USD";
+const DEFAULT_FROM = "USD";
+const DEFAULT_TO = "ZAR";
 
 type ConverterProps = {
+  baseCurrency: string;
   rates: Record<string, number>;
   currencies: Record<string, string>;
 };
@@ -19,36 +21,45 @@ const amountFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 2,
 });
 
-function rateFor(code: string, rates: Record<string, number>): number | undefined {
-  return code === BASE_CURRENCY ? 1 : rates[code];
+function rateFor(
+  code: string,
+  base: string,
+  rates: Record<string, number>,
+): number | undefined {
+  return code === base ? 1 : rates[code];
 }
 
 function convert(
   amount: number,
   from: string,
   to: string,
+  base: string,
   rates: Record<string, number>,
 ): number | null {
   if (!Number.isFinite(amount) || amount < 0) return null;
 
-  const fromRate = rateFor(from, rates);
-  const toRate = rateFor(to, rates);
+  const fromRate = rateFor(from, base, rates);
+  const toRate = rateFor(to, base, rates);
   if (fromRate === undefined || toRate === undefined || fromRate === 0) {
     return null;
   }
 
-  if (from === BASE_CURRENCY) return amount * toRate;
-  if (to === BASE_CURRENCY) return amount / fromRate;
+  if (from === base) return amount * toRate;
+  if (to === base) return amount / fromRate;
   return (amount / fromRate) * toRate;
 }
 
 const fieldClass =
   "h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/20";
 
-export default function Converter({ rates, currencies }: ConverterProps) {
+export default function Converter({
+  baseCurrency,
+  rates,
+  currencies,
+}: ConverterProps) {
   const [amount, setAmount] = useState<number>(1);
-  const [fromCurrency, setFromCurrency] = useState<string>(BASE_CURRENCY);
-  const [toCurrency, setToCurrency] = useState<string>("ZAR");
+  const [fromCurrency, setFromCurrency] = useState<string>(DEFAULT_FROM);
+  const [toCurrency, setToCurrency] = useState<string>(DEFAULT_TO);
 
   const id = useId();
   const amountId = `${id}-amount`;
@@ -57,7 +68,9 @@ export default function Converter({ rates, currencies }: ConverterProps) {
 
   const options = useMemo(() => {
     const codes = new Set<string>([
-      BASE_CURRENCY,
+      baseCurrency,
+      fromCurrency,
+      toCurrency,
       ...Object.keys(rates),
       ...Object.keys(currencies),
     ]);
@@ -67,9 +80,15 @@ export default function Converter({ rates, currencies }: ConverterProps) {
         code,
         label: currencies[code] ? `${code} — ${currencies[code]}` : code,
       }));
-  }, [rates, currencies]);
+  }, [baseCurrency, fromCurrency, toCurrency, rates, currencies]);
 
-  const result = convert(amount, fromCurrency, toCurrency, rates);
+  const result = convert(
+    amount,
+    fromCurrency,
+    toCurrency,
+    baseCurrency,
+    rates,
+  );
 
   function swap(): void {
     setFromCurrency(toCurrency);

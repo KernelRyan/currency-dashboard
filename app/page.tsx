@@ -1,8 +1,7 @@
 import { LineChart } from "lucide-react";
 import { getCurrencies, getLatestRates } from "@/lib/frankfurter";
+import { parseBaseCurrency } from "./api/rates/route";
 import LiveRates from "./LiveRates";
-
-const BASE_CURRENCY = "USD";
 
 function formatDate(isoDate: string): string {
   return new Intl.DateTimeFormat("en-US", {
@@ -11,9 +10,12 @@ function formatDate(isoDate: string): string {
   }).format(new Date(`${isoDate}T00:00:00Z`));
 }
 
-export default async function Home() {
+export default async function Home({ searchParams }: PageProps<"/">) {
+  const { base: rawBase } = await searchParams;
+  const base = parseBaseCurrency(typeof rawBase === "string" ? rawBase : null);
+
   const [ratesResult, currenciesResult] = await Promise.allSettled([
-    getLatestRates(BASE_CURRENCY),
+    getLatestRates(base),
     getCurrencies(),
   ]);
 
@@ -30,11 +32,9 @@ export default async function Home() {
             Currency Dashboard
           </h1>
         </header>
-        <p className="text-sm text-zinc-500 mt-1">
-          Exchange rates for 1 {BASE_CURRENCY}
-        </p>
 
         <LiveRates
+          initialBase={base}
           initialRates={latest?.rates ?? {}}
           initialDate={latest?.date ?? ""}
           currencies={currencies}

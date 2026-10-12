@@ -1,10 +1,20 @@
+import type { NextRequest } from "next/server";
 import {
   getCurrenciesFresh,
   getLatestRatesFresh,
   type Currencies,
 } from "@/lib/frankfurter";
 
-const BASE_CURRENCY = "USD";
+export const BASE_CURRENCIES = ["USD", "EUR", "GBP", "JPY", "ZAR"] as const;
+export type BaseCurrency = (typeof BASE_CURRENCIES)[number];
+export const DEFAULT_BASE: BaseCurrency = "USD";
+
+export function parseBaseCurrency(
+  value: string | null | undefined,
+): BaseCurrency {
+  const code = value?.trim().toUpperCase();
+  return BASE_CURRENCIES.find((c) => c === code) ?? DEFAULT_BASE;
+}
 
 export type RatesResponse = {
   base: string;
@@ -19,10 +29,12 @@ export type RatesErrorResponse = {
 
 const NO_STORE_HEADERS = { "Cache-Control": "no-store" };
 
-export async function GET(): Promise<Response> {
+export async function GET(request: NextRequest): Promise<Response> {
+  const base = parseBaseCurrency(request.nextUrl.searchParams.get("base"));
+
   try {
     const [latest, currencies] = await Promise.all([
-      getLatestRatesFresh(BASE_CURRENCY),
+      getLatestRatesFresh(base),
       getCurrenciesFresh(),
     ]);
 
@@ -36,7 +48,7 @@ export async function GET(): Promise<Response> {
       { headers: NO_STORE_HEADERS },
     );
   } catch (err) {
-    console.error("GET /api/rates failed:", err);
+    console.error(`GET /api/rates?base=${base} failed:`, err);
 
     return Response.json(
       { error: "Failed to fetch exchange rates" } satisfies RatesErrorResponse,
