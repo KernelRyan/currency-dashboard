@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { RatesResponse } from "./api/rates/route";
+import Converter from "./Converter";
 
 const POLL_INTERVAL_MS = 30_000;
 const TICK_INTERVAL_MS = 1_000;
@@ -120,7 +121,9 @@ export default function LiveRates({
 
   return (
     <section className="mt-8">
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-500">
+      <Converter rates={rates} currencies={currencies} />
+
+      <div className="mt-8 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-500">
         <span className="inline-flex items-center gap-1.5 font-medium text-zinc-900">
           <span className="relative flex size-2">
             <span className="absolute inline-flex size-full animate-ping rounded-full bg-green-400 opacity-75" />
