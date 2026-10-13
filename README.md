@@ -1,36 +1,95 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Currency Dashboard
+
+**🔗 Live demo:** https://currency-dashboard-wheat.vercel.app
+
+A live currency dashboard with real-time exchange rates, a multi-currency converter, and 30-day historical charts. Built with Next.js 16 and TypeScript.
+
+## Features
+
+- **Live exchange rates** for 14 currencies vs. a selectable base
+- **Auto-refresh** every 30 seconds with a pulsing "Live" indicator and timestamp
+- **Currency converter** with swap button and live recalculation
+- **Dynamic base currency** selector (USD, EUR, GBP, JPY, ZAR) with URL persistence (`?base=ZAR`)
+- **30-day line chart** — click any currency card to see its rate history, powered by Recharts
+- **Server-side caching** — rates cached for 1 hour, chart data cached for 1 hour
+- **Graceful fallbacks** — handles API errors and unsupported currencies cleanly
+
+## Tech Stack
+
+- **Framework:** Next.js 16 (App Router, Turbopack)
+- **Language:** TypeScript (strict)
+- **Styling:** Tailwind CSS
+- **Charts:** Recharts
+- **Icons:** lucide-react
+- **API:** [Frankfurter](https://www.frankfurter.app/) — free, no API key required
+- **Deployment:** Vercel
+
+## Architecture
+
+    Browser
+       │
+       ├── Server Component (app/page.tsx)
+       │       │
+       │       └── getLatestRates() → cached 1h
+       │              │
+       │              └── Frankfurter API
+       │
+       └── Client Component (app/LiveRates.tsx)
+               │
+               ├── Polls /api/rates every 30s (no cache)
+               ├── Renders Converter (client-side math using fetched rates)
+               └── Renders RateChart (fetches /api/history on click)
+
+### Data Flow
+
+1. **Initial page load** — the Server Component fetches rates and currencies from Frankfurter (cached 1 hour) and passes them to `LiveRates`
+2. **Client polling** — `LiveRates` polls `/api/rates` every 30 seconds to keep rates fresh. The API route fetches from Frankfurter without caching
+3. **Base currency change** — updates the URL (`?base=ZAR`), refetches rates with the new base, and the polling interval resets to use the new base
+4. **Chart** — when a user clicks a currency card, `RateChart` fetches `/api/history?base=X&symbol=Y` which queries Frankfurter for 30 days of data
+
+## Project Structure
+
+    app/
+      page.tsx                    Homepage (Server Component)
+      layout.tsx                  Root layout + ambient glow
+      LiveRates.tsx               Live grid (Client Component)
+      Converter.tsx               Currency converter
+      RateChart.tsx               30-day chart
+      loading.tsx                 Skeleton loader
+      api/
+        rates/route.ts            Returns latest rates (no cache)
+        history/route.ts          Returns 30-day time series
+
+    lib/
+      frankfurter.ts              API helpers with caching
 
 ## Getting Started
 
-First, run the development server:
+1. Clone the repo:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+       git clone https://github.com/KernelRyan/currency-dashboard.git
+       cd currency-dashboard
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+       npm install
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. Start the dev server:
 
-## Learn More
+       npm run dev
 
-To learn more about Next.js, take a look at the following resources:
+4. Open http://localhost:3000
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**No API keys or environment variables needed** — Frankfurter is a free public API.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## API Reference
 
-## Deploy on Vercel
+This project uses [Frankfurter](https://www.frankfurter.app/docs/):
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `GET /latest?from=USD` — latest rates
+- `GET /currencies` — list of supported currencies
+- `GET /{start}..?from=USD&to=ZAR` — time series for a specific pair
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
+
+MIT
