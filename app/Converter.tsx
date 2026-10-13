@@ -50,7 +50,10 @@ function convert(
 }
 
 const fieldClass =
-  "h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/20";
+  "h-10 w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 text-sm text-zinc-100 transition-colors hover:border-zinc-700 focus:border-emerald-500/50 focus:outline-none focus:ring-1 focus:ring-emerald-500/30";
+
+const labelClass =
+  "block text-xs text-zinc-500 uppercase tracking-wider mb-1.5";
 
 export default function Converter({
   baseCurrency,
@@ -96,15 +99,15 @@ export default function Converter({
   }
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-6">
-      <h2 className="flex items-center gap-2 text-sm font-medium text-zinc-900">
-        <ArrowRightLeft className="size-4 text-indigo-600" aria-hidden="true" />
+    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur">
+      <h2 className="flex items-center gap-2 text-sm font-medium tracking-tight text-zinc-100">
+        <ArrowRightLeft className="size-4 text-emerald-400" aria-hidden="true" />
         Convert
       </h2>
 
-      <div className="mt-4 grid grid-cols-1 md:grid-cols-[1fr_1fr_auto_1fr] gap-3 items-end">
+      <div className="mt-5 grid grid-cols-1 md:grid-cols-[1fr_1fr_auto_1fr] gap-3 items-end">
         <div>
-          <label htmlFor={amountId} className="block text-xs text-zinc-500 mb-1">
+          <label htmlFor={amountId} className={labelClass}>
             Amount
           </label>
           <input
@@ -115,12 +118,12 @@ export default function Converter({
             step={0.01}
             value={Number.isNaN(amount) ? "" : amount}
             onChange={(e) => setAmount(e.target.valueAsNumber)}
-            className={`${fieldClass} tabular-nums`}
+            className={`${fieldClass} font-mono tabular-nums`}
           />
         </div>
 
         <div>
-          <label htmlFor={fromId} className="block text-xs text-zinc-500 mb-1">
+          <label htmlFor={fromId} className={labelClass}>
             From
           </label>
           <select
@@ -142,13 +145,13 @@ export default function Converter({
           onClick={swap}
           aria-label="Swap currencies"
           title="Swap currencies"
-          className="inline-flex h-10 w-full md:w-10 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 transition-colors"
+          className="inline-flex h-10 w-full md:w-10 cursor-pointer items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 transition-colors hover:border-emerald-500/50 hover:text-emerald-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-500/40"
         >
           <ArrowLeftRight className="size-4" aria-hidden="true" />
         </button>
 
         <div>
-          <label htmlFor={toId} className="block text-xs text-zinc-500 mb-1">
+          <label htmlFor={toId} className={labelClass}>
             To
           </label>
           <select
@@ -167,18 +170,20 @@ export default function Converter({
       </div>
 
       <p
-        className="mt-6 flex flex-wrap items-baseline gap-x-2 text-zinc-500"
+        className="mt-6 flex flex-wrap items-baseline gap-x-3 border-t border-zinc-800/80 pt-5 text-zinc-500"
         aria-live="polite"
       >
-        <span className="font-semibold text-zinc-900">
+        <span className="font-mono font-medium text-zinc-100">
           {Number.isFinite(amount) ? amountFormatter.format(amount) : "—"}{" "}
           {fromCurrency}
         </span>
         <span>=</span>
-        <span className="text-2xl font-bold text-indigo-600 tabular-nums">
+        <span className="font-mono text-3xl font-semibold text-emerald-400 tabular-nums">
           {result === null ? "—" : resultFormatter.format(result)}
         </span>
-        <span className="font-semibold text-zinc-900">{toCurrency}</span>
+        <span className="font-mono font-medium text-zinc-100">
+          {toCurrency}
+        </span>
       </p>
     </div>
   );

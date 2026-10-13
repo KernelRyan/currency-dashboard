@@ -178,31 +178,31 @@ export default function LiveRates({
 
   return (
     <>
-      <p className="text-sm text-zinc-500 mt-1">
-        Exchange rates for 1 {snapshot.base}
+      <p className="text-sm text-zinc-400 mt-1.5">
+        Exchange rates for 1{" "}
+        <span className="font-mono text-zinc-100">{snapshot.base}</span>
       </p>
 
       <section className="mt-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-500">
-            <span className="inline-flex items-center gap-1.5 font-medium text-zinc-900">
-              <span className="relative flex size-2">
-                <span className="absolute inline-flex size-full animate-ping rounded-full bg-green-400 opacity-75" />
-                <span className="relative inline-flex size-2 rounded-full bg-green-500" />
-              </span>
+            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium uppercase tracking-widest text-emerald-400">
+              <span className="size-1.5 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_8px_var(--color-emerald-400)]" />
               Live
             </span>
             {snapshot.date && (
               <span>Rates for {formatDate(snapshot.date)}</span>
             )}
             {lastRefreshed !== null && (
-              <span aria-live="polite">
+              <span aria-live="polite" className="font-mono">
                 Updated {formatElapsed(now - lastRefreshed)}
               </span>
             )}
-            {isSwitching && <span>Loading {base} rates…</span>}
+            {isSwitching && (
+              <span className="text-zinc-400">Loading {base} rates…</span>
+            )}
             {statusError && (
-              <span className="text-amber-600" role="status">
+              <span className="text-amber-400/90" role="status">
                 {statusError}
               </span>
             )}
@@ -216,7 +216,7 @@ export default function LiveRates({
               id={baseSelectId}
               value={base}
               onChange={handleBaseChange}
-              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900"
+              className="cursor-pointer rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 transition-colors hover:border-zinc-700 focus:border-emerald-500/50 focus:outline-none focus:ring-1 focus:ring-emerald-500/30"
             >
               {Object.entries(BASE_OPTIONS).map(([code, name]) => (
                 <option key={code} value={code}>
@@ -235,7 +235,7 @@ export default function LiveRates({
           />
         </div>
 
-        <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-6">
+        <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-6">
           {FEATURED_CURRENCIES.map((code) => {
             const rate =
               code === snapshot.base ? 1 : snapshot.rates[code];
@@ -247,25 +247,25 @@ export default function LiveRates({
                   type="button"
                   onClick={() => setSelectedSymbol(code)}
                   aria-pressed={isSelected}
-                  className={`block h-full w-full cursor-pointer rounded-xl bg-white text-left transition-shadow hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600/30 ${
+                  className={`block h-full w-full cursor-pointer rounded-2xl border p-5 text-left backdrop-blur transition-all duration-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-500/50 ${
                     isSelected
-                      ? "border-2 border-indigo-500 p-[23px] shadow-sm"
-                      : "border border-zinc-200 p-6"
+                      ? "border-zinc-700 bg-zinc-900/80 ring-1 ring-emerald-500/50 shadow-[0_0_32px_-12px_var(--color-emerald-500)]"
+                      : "border-zinc-800 bg-zinc-900/50 hover:border-zinc-700 hover:bg-zinc-900/80 hover:ring-1 hover:ring-white/5"
                   }`}
                 >
-                  <span className="block text-sm font-medium text-zinc-500">
+                  <span className="block text-xs font-medium uppercase tracking-wider text-zinc-400">
                     {code}
                   </span>
-                  <span className="block text-xs text-zinc-400 mt-1 truncate">
+                  <span className="block text-xs text-zinc-500 mt-0.5 truncate">
                     {currencies[code] ?? code}
                   </span>
                   {rate !== undefined ? (
-                    <span className="block text-2xl font-semibold text-indigo-600 mt-3 tabular-nums">
+                    <span className="block font-mono text-2xl font-semibold text-emerald-400 mt-3 tabular-nums">
                       {formatRate(rate)}
                     </span>
                   ) : (
                     <span
-                      className="block text-2xl font-semibold text-zinc-300 mt-3"
+                      className="block font-mono text-2xl font-semibold text-zinc-700 mt-3"
                       title="Rate not available"
                     >
                       —

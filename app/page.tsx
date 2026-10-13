@@ -24,11 +24,11 @@ export default async function Home({ searchParams }: PageProps<"/">) {
     currenciesResult.status === "fulfilled" ? currenciesResult.value : {};
 
   return (
-    <div className="flex-1 bg-zinc-50">
-      <main className="max-w-5xl mx-auto px-6 py-12 bg-zinc-50 min-h-screen">
-        <header className="flex items-center gap-2">
-          <LineChart className="size-6 text-indigo-600" aria-hidden="true" />
-          <h1 className="text-2xl font-semibold text-zinc-900">
+    <div className="flex-1">
+      <main className="max-w-5xl mx-auto px-6 py-12 min-h-screen">
+        <header className="flex items-center gap-3">
+          <LineChart className="size-7 text-emerald-400" aria-hidden="true" />
+          <h1 className="text-3xl font-semibold tracking-tight text-zinc-100">
             Currency Dashboard
           </h1>
         </header>
@@ -40,12 +40,12 @@ export default async function Home({ searchParams }: PageProps<"/">) {
           currencies={currencies}
         />
 
-        <footer className="text-xs text-zinc-500 mt-8 text-center">
+        <footer className="text-xs text-zinc-500 mt-10 text-center">
           {latest && <>Last updated {formatDate(latest.date)} · </>}
           Data from{" "}
           <a
             href="https://www.frankfurter.app/"
-            className="underline underline-offset-2 hover:text-zinc-900"
+            className="underline decoration-zinc-700 underline-offset-2 transition-colors hover:text-emerald-400 hover:decoration-emerald-400/50"
             target="_blank"
             rel="noopener noreferrer"
           >

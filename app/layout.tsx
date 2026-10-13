@@ -21,9 +21,19 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased scheme-dark`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      {/* `!` is needed: globals.css styles `body` outside any cascade layer. */}
+      <body className="min-h-full flex flex-col bg-zinc-950! text-zinc-100! font-sans!">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+        >
+          <div className="absolute -top-48 -left-48 size-[44rem] rounded-full bg-radial from-emerald-500/10 to-transparent to-70% blur-3xl" />
+          <div className="absolute -right-48 -bottom-48 size-[44rem] rounded-full bg-radial from-cyan-500/5 to-transparent to-70% blur-3xl" />
+        </div>
+        {children}
+      </body>
     </html>
   );
 }

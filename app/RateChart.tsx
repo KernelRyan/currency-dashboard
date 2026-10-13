@@ -1,23 +1,24 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useId, useState, type ReactNode } from "react";
 import {
+  Area,
+  AreaChart,
   CartesianGrid,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
+  type TooltipContentProps,
 } from "recharts";
 import type { RatePoint } from "@/lib/frankfurter";
 import type { HistoryResponse } from "./api/history/route";
 
 const CHART_HEIGHT = 320;
-const INDIGO_600 = "#4f46e5";
-const ZINC_200 = "#e4e4e7";
-const ZINC_400 = "#a1a1aa";
+const EMERALD_400 = "#34d399";
+const ZINC_800 = "#27272a";
 const ZINC_500 = "#71717a";
+const ZINC_950 = "#09090b";
 
 type RateChartProps = {
   baseCurrency: string;
@@ -65,6 +66,9 @@ function formatRate(rate: number): string {
   }).format(rate);
 }
 
+const cardClass =
+  "mt-6 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur";
+
 function ChartCard({
   title,
   children,
@@ -73,9 +77,11 @@ function ChartCard({
   children: ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-6 mt-6">
-      <h2 className="text-sm font-medium text-zinc-900">{title}</h2>
-      <div className="mt-4">{children}</div>
+    <div className={cardClass}>
+      <h2 className="text-sm font-medium tracking-tight text-zinc-100">
+        {title}
+      </h2>
+      <div className="mt-5">{children}</div>
     </div>
   );
 }
@@ -83,7 +89,7 @@ function ChartCard({
 function ChartMessage({ children }: { children: ReactNode }) {
   return (
     <div
-      className="flex items-center justify-center text-sm text-zinc-400"
+      className="flex items-center justify-center text-sm text-zinc-500"
       style={{ height: CHART_HEIGHT }}
     >
       {children}
@@ -91,8 +97,41 @@ function ChartMessage({ children }: { children: ReactNode }) {
   );
 }
 
+function RateTooltip({
+  active,
+  payload,
+  label,
+  baseCurrency,
+  symbol,
+}: TooltipContentProps & {
+  baseCurrency: string;
+  symbol: string;
+}) {
+  const value = payload?.[0]?.value;
+  if (!active || typeof value !== "number" || typeof label !== "string") {
+    return null;
+  }
+
+  return (
+    <div className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs text-zinc-100 shadow-xl shadow-black/40">
+      <p className="text-zinc-500">
+        {tooltipDateFormatter.format(parseIsoDate(label))}
+      </p>
+      <p className="mt-1">
+        <span className="font-mono text-sm font-semibold text-emerald-400">
+          {formatRate(value)}
+        </span>{" "}
+        <span className="text-zinc-400">
+          {symbol} per {baseCurrency}
+        </span>
+      </p>
+    </div>
+  );
+}
+
 export default function RateChart({ baseCurrency, symbol }: RateChartProps) {
   const [result, setResult] = useState<HistoryResult | null>(null);
+  const gradientId = `rate-fill-${useId()}`;
 
   const isSameCurrency = symbol !== null && symbol === baseCurrency;
   const requestKey = symbol && !isSameCurrency ? `${baseCurrency}:${symbol}` : null;
@@ -129,10 +168,12 @@ export default function RateChart({ baseCurrency, symbol }: RateChartProps) {
 
   if (symbol === null) {
     return (
-      <div className="mt-6 rounded-xl border border-dashed border-zinc-300 bg-white p-6 py-12 text-center">
-        <p className="text-sm text-zinc-400">
-          Click a currency to see its 30-day trend
-        </p>
+      <div className={cardClass}>
+        <div className="rounded-xl border border-dashed border-zinc-800 p-12 text-center">
+          <p className="text-sm text-zinc-500">
+            Click a currency to see its 30-day trend
+          </p>
+        </div>
       </div>
     );
   }
@@ -155,7 +196,7 @@ export default function RateChart({ baseCurrency, symbol }: RateChartProps) {
     return (
       <ChartCard title={title}>
         <div
-          className="animate-pulse rounded-lg bg-zinc-100"
+          className="animate-pulse rounded-xl bg-zinc-800/40"
           style={{ height: CHART_HEIGHT }}
           aria-busy="true"
           aria-label="Loading chart"
@@ -182,16 +223,23 @@ export default function RateChart({ baseCurrency, symbol }: RateChartProps) {
     );
   }
 
+  const axisTick = { fontSize: 11, fill: ZINC_500 };
+
   return (
     <ChartCard title={title}>
       <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
-        <LineChart
+        <AreaChart
           data={current.data}
           margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
         >
+          <defs>
+            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={EMERALD_400} stopOpacity={0.3} />
+              <stop offset="100%" stopColor={EMERALD_400} stopOpacity={0} />
+            </linearGradient>
+          </defs>
           <CartesianGrid
-            stroke={ZINC_400}
-            strokeOpacity={0.35}
+            stroke={ZINC_800}
             strokeDasharray="3 3"
             vertical={false}
           />
@@ -200,45 +248,39 @@ export default function RateChart({ baseCurrency, symbol }: RateChartProps) {
             tickFormatter={(value: string) =>
               tickDateFormatter.format(parseIsoDate(value))
             }
-            tick={{ fontSize: 12, fill: ZINC_500 }}
+            tick={axisTick}
             tickLine={false}
-            axisLine={{ stroke: ZINC_200 }}
+            axisLine={{ stroke: ZINC_800 }}
             minTickGap={24}
           />
           <YAxis
             domain={["auto", "auto"]}
             tickFormatter={(value: number) => formatRate(value)}
-            tick={{ fontSize: 12, fill: ZINC_500 }}
+            tick={axisTick}
             tickLine={false}
             axisLine={false}
             width={64}
           />
           <Tooltip
-            formatter={(value) => [
-              typeof value === "number" ? formatRate(value) : String(value),
-              `1 ${baseCurrency} in ${symbol}`,
-            ]}
-            labelFormatter={(label) =>
-              typeof label === "string"
-                ? tooltipDateFormatter.format(parseIsoDate(label))
-                : label
-            }
-            contentStyle={{
-              borderRadius: 8,
-              borderColor: ZINC_200,
-              fontSize: 12,
-            }}
-            labelStyle={{ color: "#18181b", fontWeight: 500 }}
+            cursor={{ stroke: ZINC_500, strokeDasharray: "3 3" }}
+            content={(props: TooltipContentProps) => (
+              <RateTooltip
+                {...props}
+                baseCurrency={baseCurrency}
+                symbol={symbol}
+              />
+            )}
           />
-          <Line
+          <Area
             type="monotone"
             dataKey="rate"
-            stroke={INDIGO_600}
+            stroke={EMERALD_400}
             strokeWidth={2}
+            fill={`url(#${gradientId})`}
             dot={false}
-            activeDot={{ r: 4 }}
+            activeDot={{ r: 4, fill: EMERALD_400, stroke: ZINC_950, strokeWidth: 2 }}
           />
-        </LineChart>
+        </AreaChart>
       </ResponsiveContainer>
     </ChartCard>
   );
