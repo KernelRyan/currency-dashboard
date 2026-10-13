@@ -184,47 +184,27 @@ export default function LiveRates({
       </p>
 
       <section className="mt-8">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-500">
-            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium uppercase tracking-widest text-emerald-400">
-              <span className="size-1.5 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_8px_var(--color-emerald-400)]" />
-              Live
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-500">
+          <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium uppercase tracking-widest text-emerald-400">
+            <span className="size-1.5 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_8px_var(--color-emerald-400)]" />
+            Live
+          </span>
+          {snapshot.date && (
+            <span>Rates for {formatDate(snapshot.date)}</span>
+          )}
+          {lastRefreshed !== null && (
+            <span aria-live="polite" className="font-mono">
+              Updated {formatElapsed(now - lastRefreshed)}
             </span>
-            {snapshot.date && (
-              <span>Rates for {formatDate(snapshot.date)}</span>
-            )}
-            {lastRefreshed !== null && (
-              <span aria-live="polite" className="font-mono">
-                Updated {formatElapsed(now - lastRefreshed)}
-              </span>
-            )}
-            {isSwitching && (
-              <span className="text-zinc-400">Loading {base} rates…</span>
-            )}
-            {statusError && (
-              <span className="text-amber-400/90" role="status">
-                {statusError}
-              </span>
-            )}
-          </div>
-
-          <div className="flex items-center">
-            <label htmlFor={baseSelectId} className="text-sm text-zinc-500 mr-2">
-              Base:
-            </label>
-            <select
-              id={baseSelectId}
-              value={base}
-              onChange={handleBaseChange}
-              className="cursor-pointer rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 transition-colors hover:border-zinc-700 focus:border-emerald-500/50 focus:outline-none focus:ring-1 focus:ring-emerald-500/30"
-            >
-              {Object.entries(BASE_OPTIONS).map(([code, name]) => (
-                <option key={code} value={code}>
-                  {code} — {name}
-                </option>
-              ))}
-            </select>
-          </div>
+          )}
+          {isSwitching && (
+            <span className="text-zinc-400">Loading {base} rates…</span>
+          )}
+          {statusError && (
+            <span className="text-amber-400/90" role="status">
+              {statusError}
+            </span>
+          )}
         </div>
 
         <div className="mt-4">
@@ -235,7 +215,28 @@ export default function LiveRates({
           />
         </div>
 
-        <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-6">
+        <div className="mt-4 flex flex-col items-stretch gap-1.5 py-2 sm:flex-row sm:items-center sm:justify-end sm:gap-3">
+          <label
+            htmlFor={baseSelectId}
+            className="text-xs uppercase tracking-wider text-zinc-500 sm:text-sm sm:normal-case sm:tracking-normal"
+          >
+            Base:
+          </label>
+          <select
+            id={baseSelectId}
+            value={base}
+            onChange={handleBaseChange}
+            className="w-full cursor-pointer rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 transition-colors hover:border-zinc-700 focus:border-emerald-500/50 focus:outline-none focus:ring-1 focus:ring-emerald-500/30 sm:w-auto"
+          >
+            {Object.entries(BASE_OPTIONS).map(([code, name]) => (
+              <option key={code} value={code}>
+                {code} — {name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-4">
           {FEATURED_CURRENCIES.map((code) => {
             const rate =
               code === snapshot.base ? 1 : snapshot.rates[code];
